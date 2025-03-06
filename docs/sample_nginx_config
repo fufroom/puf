@@ -1,0 +1,51 @@
+server {
+    server_name example.com www.example.com;
+
+    root /var/www/example.com/serve;
+    index index.php index.html;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    # Block access to private data
+    location /private/ {
+        deny all;
+        return 403;
+    }
+
+    # PHP handling
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    # Block hidden files (e.g., .git, .env)
+    location ~ /\. {
+        deny all;
+        return 403;
+    }
+
+    # Enforce HTTPS
+    listen 443 ssl;
+    ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+}
+
+server {
+    listen 80;
+    server_name example.com www.example.com;
+
+    if ($host = www.example.com) {
+        return 301 https://$host$request_uri;
+    }
+
+    if ($host = example.com) {
+        return 301 https://$host$request_uri;
+    }
+
+    return 404;
+}
