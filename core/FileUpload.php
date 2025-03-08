@@ -28,7 +28,7 @@ class FileUpload {
             }
 
             $extension = strtolower(pathinfo($_FILES['images']['name'][$index], PATHINFO_EXTENSION));
-            $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
+            $allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
             if (!in_array($extension, $allowedTypes)) {
                 $response['errors'][] = "Invalid file type: " . $_FILES['images']['name'][$index];
